@@ -1,0 +1,82 @@
+# 1. NAMESPACE
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-diego-bonilla
+---
+# 2. CONFIGMAP (Obligatorio: variable AMBIENTE)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-diego-bonilla
+  namespace: ns-diego-bonilla
+data:
+  AMBIENTE: "produccion"
+---
+# 3. SECRET (Obligatorio: variable API_KEY)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-diego-bonilla
+  namespace: ns-diego-bonilla
+type: Opaque
+stringData:
+  API_KEY: "super-secreto-k8s"
+---
+# 4. DEPLOYMENT (2 réplicas, tu imagen propia y variables inyectadas)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-diego-bonilla
+  namespace: ns-diego-bonilla
+  labels:
+    app: app-diego-bonilla
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-diego-bonilla
+  template:
+    metadata:
+      labels:
+        app: app-diego-bonilla
+    spec:
+      containers:
+      - name: web-app
+        image: boldox/lab3:diego-bonilla
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        env:
+        - name: AMBIENTE
+          valueFrom:
+            configMapKeyRef:
+              name: config-diego-bonilla
+              key: AMBIENTE
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: secret-diego-bonilla
+              key: API_KEY
+---
+# 5. SERVICE (Mapea puerto 80 del Service al 3000 de NestJS)
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-diego-bonilla
+  namespace: ns-diego-bonilla
+spec:
+  type: ClusterIP
+  selector:
+    app: app-diego-bonilla
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
