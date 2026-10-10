@@ -1,0 +1,64 @@
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl cluster-info
+Kubernetes control plane is running at https://127.0.0.1:4295
+CoreDNS is running at https://127.0.0.1:4295/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl get nodes
+NAME                    STATUS   ROLES           AGE     VERSION
+desktop-control-plane   Ready    control-plane   5h17m   v1.36.1
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl get pods -n ns-diego-bonilla
+NAME                                 READY   STATUS    RESTARTS   AGE
+app-diego-bonilla-7776cb4dcc-2xsvw   1/1     Running   0          4h51m
+app-diego-bonilla-7776cb4dcc-jz4vj   1/1     Running   0          4h51m
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl get deployment -n ns-diego-bonilla
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE
+app-diego-bonilla   2/2     2            2           4h51m
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl get svc -n ns-diego-bonilla
+NAME                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+svc-diego-bonilla   ClusterIP   10.96.116.171   <none>        80/TCP    4h51m
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl logs deployment/app-diego-bonilla -n ns-diego-bonilla
+Found 2 pods, using pod/app-diego-bonilla-7776cb4dcc-2xsvw
+[Nest] 1  - 10/10/2026, 6:19:23 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 1  - 10/10/2026, 6:19:24 PM     LOG [InstanceLoader] AppModule dependencies initialized +494ms
+[Nest] 1  - 10/10/2026, 6:19:24 PM     LOG [RoutesResolver] AppController {/}: +103ms
+[Nest] 1  - 10/10/2026, 6:19:24 PM     LOG [RouterExplorer] Mapped {/, GET} route +197ms
+[Nest] 1  - 10/10/2026, 6:19:24 PM     LOG [RouterExplorer] Mapped {/lab, GET} route +2ms
+[Nest] 1  - 10/10/2026, 6:19:24 PM     LOG [NestApplication] Nest application successfully started +98ms
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl exec deployment/app-diego-bonilla -n ns-diego-bonilla -- printenv
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=app-diego-bonilla-7776cb4dcc-2xsvw
+NODE_VERSION=24.21.0
+YARN_VERSION=1.22.22
+AMBIENTE=produccion
+API_KEY=super-secreto-k8s
+SVC_DIEGO_BONILLA_SERVICE_HOST=10.96.116.171
+SVC_DIEGO_BONILLA_SERVICE_PORT=80
+SVC_DIEGO_BONILLA_PORT=tcp://10.96.116.171:80
+SVC_DIEGO_BONILLA_PORT_80_TCP_PROTO=tcp
+SVC_DIEGO_BONILLA_PORT_80_TCP_PORT=80
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PORT=443
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+SVC_DIEGO_BONILLA_SERVICE_PORT_HTTP=80
+SVC_DIEGO_BONILLA_PORT_80_TCP=tcp://10.96.116.171:80
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+SVC_DIEGO_BONILLA_PORT_80_TCP_ADDR=10.96.116.171
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_SERVICE_PORT_HTTPS=443
+HOME=/root
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl get configmap config-diego-bonilla -n ns-diego-bonilla
+NAME                   DATA   AGE
+config-diego-bonilla   1      4h52m
+
+dbonilla@LAPTOP-UCVKVACG:~/proyectos/workspace/lab3$ kubectl get secret secret-diego-bonilla -n ns-diego-bonilla
+NAME                   TYPE     DATA   AGE
+secret-diego-bonilla   Opaque   1      4h52m
